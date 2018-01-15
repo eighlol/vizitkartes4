@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Vizitkartes.API.Entities;
+using Vizitkartes.API.Services;
 
 namespace Vizitkartes.API
 {
@@ -23,10 +24,11 @@ namespace Vizitkartes.API
 
             var connectionString = Configuration["connectionStrings:vizitKartesDBConnectionString"];
             services.AddDbContext<VizitkartesContext>(o => o.UseSqlServer(connectionString));
+            services.AddScoped<IBusinessCardRepository, BusinessCardRepository>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env, VizitkartesContext vizitkartesContext)
         {
             if (env.IsDevelopment())
             {
@@ -37,6 +39,7 @@ namespace Vizitkartes.API
                 app.UseExceptionHandler();
             }
             
+            vizitkartesContext.EnsureSeedDataForContext();
 
             app.UseStatusCodePages();
 

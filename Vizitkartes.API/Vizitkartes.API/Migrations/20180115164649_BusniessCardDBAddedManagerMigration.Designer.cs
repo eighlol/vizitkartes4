@@ -11,9 +11,10 @@ using Vizitkartes.API.Entities;
 namespace Vizitkartes.API.Migrations
 {
     [DbContext(typeof(VizitkartesContext))]
-    partial class VizitkartesContextModelSnapshot : ModelSnapshot
+    [Migration("20180115164649_BusniessCardDBAddedManagerMigration")]
+    partial class BusniessCardDBAddedManagerMigration
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
