@@ -6,20 +6,35 @@ namespace Vizitkartes.API.Services
 {
     public class BusinessCardRepository : IBusinessCardRepository
     {
-        private readonly VizitkartesContext _context;
+        private readonly VizitkartesContext _dbContextSeedData;
 
-        public BusinessCardRepository(VizitkartesContext context)
+        public BusinessCardRepository(VizitkartesContext dbContextSeedData)
         {
-            _context = context;
+            _dbContextSeedData = dbContextSeedData;
         }
         public IEnumerable<BusinessCard> GetBusinessCards()
         {
-            return _context.BusinessCards.OrderBy(b => b.Name).ThenBy(tb => tb.Surname).ToList();
+            return _dbContextSeedData.BusinessCards.OrderBy(b => b.Name).ThenBy(tb => tb.Surname).ToList();
         }
 
         public BusinessCard GetBusinessCard(int businessCardId)
         {
-            return _context.BusinessCards.FirstOrDefault(b => b.Id == businessCardId);
+            return _dbContextSeedData.BusinessCards.FirstOrDefault(b => b.Id == businessCardId);
+        }
+
+        public BusinessCard GetBusinessCard(string userId)
+        {
+            return _dbContextSeedData.BusinessCards.FirstOrDefault(b => b.UserId == userId);
+        }
+
+        public void AddBusinessCard(BusinessCard businessCard)
+        {
+            _dbContextSeedData.BusinessCards.Add(businessCard);
+        }
+
+        public bool Save()
+        {
+            return (_dbContextSeedData.SaveChanges() >= 0);
         }
     }
 }

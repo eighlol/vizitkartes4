@@ -14,7 +14,7 @@ namespace Vizitkartes.API.Entities
         public string Position { get; set; }
         public string PhoneNumber { get; set; }
 		[ForeignKey("UserId")]
-        public User User { get; set; }
-        public int UserId { get; set; }
+        public VizitkartesUser User { get; set; }
+        public string UserId { get; set; }
     }
 }

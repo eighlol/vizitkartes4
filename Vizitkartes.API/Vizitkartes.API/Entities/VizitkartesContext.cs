@@ -1,8 +1,11 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 
 namespace Vizitkartes.API.Entities
 {
-    public class VizitkartesContext : DbContext
+    public class VizitkartesContext : IdentityDbContext<VizitkartesUser>
     {
         public VizitkartesContext(DbContextOptions<VizitkartesContext> options) : base(options)
         {
@@ -13,7 +16,7 @@ namespace Vizitkartes.API.Entities
         public DbSet<Office> Offices { get; set; }
         public DbSet<Department> Departments { get; set; }
         public DbSet<BusinessCard> BusinessCards { get; set; }
-        public DbSet<Role> Roles { get; set; }
-        public DbSet<User> Users { get; set; }
+        //public DbSet<Role> Roles { get; set; }
+        //public DbSet<User> Users { get; set; }
     }
 }

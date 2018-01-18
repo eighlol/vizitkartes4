@@ -1,7 +1,9 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.AspNetCore.Identity;
 
 namespace Vizitkartes.API.Entities
 {
@@ -16,7 +18,8 @@ namespace Vizitkartes.API.Entities
         public ICollection<Department> Departments { get; set; } = new List<Department>();
         public ICollection<Office> Offices { get; set; } = new List<Office>();
         [ForeignKey("ManagerId")]
-        public User Manager { get; set; }
-        public int ManagerId { get; set; }
+        public VizitkartesUser Manager { get; set; }
+        public string ManagerId { get; set; }
+        public ICollection<VizitkartesUser> Empoloyees { get; set; } = new List<VizitkartesUser>();
     }
 }

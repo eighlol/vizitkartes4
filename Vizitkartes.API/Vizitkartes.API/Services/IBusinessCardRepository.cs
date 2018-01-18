@@ -10,6 +10,9 @@ namespace Vizitkartes.API.Services
     {
         IEnumerable<BusinessCard> GetBusinessCards();
         BusinessCard GetBusinessCard(int businessCardId);
+        void AddBusinessCard(BusinessCard businessCard);
+        BusinessCard GetBusinessCard(string userId);
+        bool Save();
 
     }
 }
