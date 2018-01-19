@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore.Storage;
 
 namespace Vizitkartes.API.Entities
 {
-    public class VizitkartesContext : IdentityDbContext<VizitkartesUser>
+    public class VizitkartesContext : IdentityDbContext<VizitkartesUser, IdentityRole, string>
     {
         public VizitkartesContext(DbContextOptions<VizitkartesContext> options) : base(options)
         {
@@ -16,6 +16,7 @@ namespace Vizitkartes.API.Entities
         public DbSet<Office> Offices { get; set; }
         public DbSet<Department> Departments { get; set; }
         public DbSet<BusinessCard> BusinessCards { get; set; }
+        public DbSet<Manager> Managers { get; set; }
         //public DbSet<Role> Roles { get; set; }
         //public DbSet<User> Users { get; set; }
     }

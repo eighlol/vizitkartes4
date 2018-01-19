@@ -11,7 +11,7 @@ using Vizitkartes.API.Services;
 
 namespace Vizitkartes.API.Controllers
 {
-    [Route("api/businessCardRequest")]
+    [Route("api/businessCards")]
     public class BusinessCardController : Controller
     {
         private readonly IBusinessCardRepository _businessCardRepository;
@@ -68,14 +68,28 @@ namespace Vizitkartes.API.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateBusinessCard([FromBody] BusinessCardDto businessCardRequest)
+        public async Task<IActionResult> UpdateBusinessCard(int id, [FromBody] BusinessCardDto businessCardDto)
         {
             var user = await _userManager.GetUserAsync(User);
-            if (_businessCardRepository.GetBusinessCard(user.Id) == null)
+
+            if (!ModelState.IsValid)
             {
-                return BadRequest("Business card does not exist!");
+                return BadRequest(ModelState);
             }
 
+            var businessCard = _businessCardRepository.GetBusinessCard(id);
+            if  (businessCard == null)
+            {
+                return NotFound("Business card does not exist!");
+            }
+
+            Mapper.Map(businessCardDto, businessCard);
+            if (!_businessCardRepository.Save())
+            {
+                return StatusCode(500, "A problem happened while handling your request.");
+            }
+
+            return NoContent();
 
         }
     }

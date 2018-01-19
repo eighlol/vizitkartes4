@@ -10,43 +10,99 @@ namespace Vizitkartes.API
     {
         private readonly VizitkartesContext _context;
         private readonly UserManager<VizitkartesUser> _userManager;
-        public VizitkartesDbContextSeedData(VizitkartesContext context, UserManager<VizitkartesUser> userManager)
+        private readonly RoleManager<IdentityRole> _roleManager;
+
+        public VizitkartesDbContextSeedData(VizitkartesContext context, UserManager<VizitkartesUser> userManager, RoleManager<IdentityRole> roleManager)
         {
             _context = context;
             _userManager = userManager;
+            _roleManager = roleManager;
         }
         public  async Task EnsureSeedDataForContext()
         {
             if (_context.Companies.Any()) return;
 
-            if (await _userManager.FindByEmailAsync("test1@gmail.com") == null)
+            if (!await _roleManager.RoleExistsAsync(Models.Roles.CompanyManager.ToString()))
+            {
+                var role = new IdentityRole
+                {
+                    Name = Models.Roles.CompanyManager.ToString()
+                };
+                await _roleManager.CreateAsync(role);
+            }
+
+            if (!await _roleManager.RoleExistsAsync(Models.Roles.Administrator.ToString()))
+            {
+                var role = new IdentityRole
+                {
+                    Name = Models.Roles.Administrator.ToString()
+                };
+                await _roleManager.CreateAsync(role);
+            }
+
+
+            if (!await _roleManager.RoleExistsAsync(Models.Roles.Employee.ToString()))
+            {
+                var role = new IdentityRole
+                {
+                    Name = Models.Roles.Employee.ToString()
+                };
+                await _roleManager.CreateAsync(role);
+            }
+
+            if (await _userManager.FindByEmailAsync("manager1@example.com") == null)
+            {
+                var newUser = new VizitkartesUser
+                {
+                    UserName = "manager1",
+                    Email = "manager1@example.com"
+                };
+                await _userManager.CreateAsync(newUser, "q1w2e3r4t5");
+                await _userManager.AddToRoleAsync(newUser, Models.Roles.CompanyManager.ToString());
+            }
+
+            if (await _userManager.FindByEmailAsync("manager2@example.com") == null)
+            {
+                var newUser = new VizitkartesUser
+                {
+                    UserName = "manager2",
+                    Email = "manager2@example.com"
+                };
+                await _userManager.CreateAsync(newUser, "q1w2e3r4t5");
+                await _userManager.AddToRoleAsync(newUser, Models.Roles.CompanyManager.ToString());
+            }
+            if (await _userManager.FindByEmailAsync("manager3@example.com") == null)
+            {
+                var newUser = new VizitkartesUser
+                {
+                    UserName = "manager3",
+                    Email = "manager3@example.com"
+                };
+                await _userManager.CreateAsync(newUser, "q1w2e3r4t5");
+                await _userManager.AddToRoleAsync(newUser, Models.Roles.CompanyManager.ToString());
+            }
+
+
+            if (await _userManager.FindByEmailAsync("employee@example.com") == null)
             {
                 var newUser = new VizitkartesUser
                 {
                     UserName = "test2",
-                    Email = "test1@gmail.com"
+                    Email = "employee@example.com"
                 };
                 await _userManager.CreateAsync(newUser, "q1w2e3r4t5");
+                await _userManager.AddToRoleAsync(newUser, Models.Roles.Employee.ToString());
             }
 
-            if (await _userManager.FindByEmailAsync("test2@gmail.com") == null)
-            {
-                var newUser = new VizitkartesUser
-                {
-                    UserName = "test2",
-                    Email = "test2@gmail.com"
-                };
-                await _userManager.CreateAsync(newUser, "q1w2e3r4t5");
-            }
-
-            if (await _userManager.FindByEmailAsync("test3@gmail.com") == null)
+            if (await _userManager.FindByEmailAsync("administrator@example.com") == null)
             {
                 var newUser = new VizitkartesUser
                 {
                     UserName = "test3",
-                    Email = "test3@gmail.com"
+                    Email = "administrator@example.com"
                 };
                 await _userManager.CreateAsync(newUser, "q1w2e3r4t5");
+                await _userManager.AddToRoleAsync(newUser, Models.Roles.Administrator.ToString());
             }
             
             var companies = new List<Company>()
@@ -72,7 +128,7 @@ namespace Vizitkartes.API
                             Fax = "+371 6709 3299"
                         }
                     },
-                    Manager = await _userManager.FindByEmailAsync("test3@gmail.com")
+                    Manager = (Manager)await _userManager.FindByEmailAsync("manager1@example.com")
                 },
                 new Company()
                 {
@@ -101,7 +157,7 @@ namespace Vizitkartes.API
                             Fax = "+371 6705 7777"
                         }
                     },
-                    Manager = await _userManager.FindByEmailAsync("test2@gmail.com")
+                    Manager = (Manager)await _userManager.FindByEmailAsync("manager2@example.com")
                 }
             };
                 

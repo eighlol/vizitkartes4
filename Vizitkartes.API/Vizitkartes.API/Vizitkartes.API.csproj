@@ -5,6 +5,18 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Migrations\20180115215222_Initial.cs" />
+    <Compile Remove="Migrations\20180115215222_Initial.Designer.cs" />
+    <Compile Remove="Migrations\20180115215755_Initial2.cs" />
+    <Compile Remove="Migrations\20180116072859_IdentityMigration.cs" />
+    <Compile Remove="Migrations\20180116072859_IdentityMigration.Designer.cs" />
+    <Compile Remove="Migrations\20180116073044_IdentityMigration1.cs" />
+    <Compile Remove="Migrations\20180116073044_IdentityMigration1.Designer.cs" />
+    <Compile Remove="Migrations\VizitkartesContextModelSnapshot.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Migrations\" />
     <Folder Include="wwwroot\" />
   </ItemGroup>
 

@@ -18,7 +18,7 @@ namespace Vizitkartes.API.Entities
         public ICollection<Department> Departments { get; set; } = new List<Department>();
         public ICollection<Office> Offices { get; set; } = new List<Office>();
         [ForeignKey("ManagerId")]
-        public VizitkartesUser Manager { get; set; }
+        public Manager Manager { get; set; }
         public string ManagerId { get; set; }
         public ICollection<VizitkartesUser> Empoloyees { get; set; } = new List<VizitkartesUser>();
     }

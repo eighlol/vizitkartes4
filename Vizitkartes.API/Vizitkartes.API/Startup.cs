@@ -34,7 +34,8 @@ namespace Vizitkartes.API
                     config.Password.RequireNonAlphanumeric = false;
                     config.Password.RequireUppercase = false;
                 })
-                .AddEntityFrameworkStores<VizitkartesContext>();
+                .AddEntityFrameworkStores<VizitkartesContext>()
+                .AddDefaultTokenProviders();
 
 
             services.ConfigureApplicationCookie(options =>
@@ -59,7 +60,11 @@ namespace Vizitkartes.API
             });
             
             services.AddTransient<VizitkartesDbContextSeedData>();
+
             services.AddScoped<IBusinessCardRepository, BusinessCardRepository>();
+            services.AddScoped<ICompanyRepository, CompanyRepository>();
+            services.AddScoped<IManagerRepository, ManagerRepository>();
+
             services.AddMvc();
         }
 
@@ -76,6 +81,7 @@ namespace Vizitkartes.API
             }
 
             app.UseAuthentication();
+
             
             app.UseStatusCodePages();
 

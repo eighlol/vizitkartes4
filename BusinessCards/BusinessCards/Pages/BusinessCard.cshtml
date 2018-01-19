@@ -1,0 +1,139 @@
+﻿@page
+@model BusinessCardModel
+@{
+    ViewData["Title"] = "My business card";
+}
+<h2>@ViewData["Title"]</h2>
+<h3>@Model.Message</h3>
+<div>
+    <div class="row">
+        <div class="col-md-4">
+            <form id="businessCardForm">
+                <div class="form-group">
+                    <label for="name">Name</label>
+                    <input id="name" name="name" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label for="surname">Surname</label>
+                    <input id="surname" name="position" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label for="position">Position</label>
+                    <input id="position" name="position" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label for="phoneNumber">Phone number</label>
+                    <input id="phoneNumber" name="phoneNumber" class="form-control" />
+                </div>
+                <button id="btnCreateBussinesCard" class="btn btn-default">Create</button>
+                <button id="btnUpdateBussinesCard" class="btn btn-default">Update</button>
+
+            </form>
+        </div>
+    </div>
+</div>
+@section Scripts {
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+
+    <script type="text/javascript">
+
+        $(document).ready(function () {
+            var businessCardObj = {};
+            function createBusinessCardForm(isEditable) {
+                if (isEditable) {
+                    $("#businessCardForm #btnUpdateBussinesCard").show();
+                    $("#businessCardForm #btnCreateBussinesCard").hide();
+                } else {
+                    $("#businessCardForm #btnCreateBussinesCard").show();
+                    $("#businessCardForm #btnUpdateBussinesCard").hide();
+                }
+            }
+
+            function fillBusinessCardForm(data) {
+                $("#businessCardForm #name").val(data.name);
+                $("#businessCardForm #surname").val(data.surname);
+                $("#businessCardForm #position").val(data.position);
+                $("#businessCardForm #phoneNumber").val(data.phoneNumber);
+            }
+
+            createBusinessCardForm(false);
+
+            $.ajax({
+                type: "GET",
+                url: "/api/businessCards",
+                dataType: "json",
+                success: function (data) {
+                    businessCardObj = data;
+                    createBusinessCardForm(true);
+                    fillBusinessCardForm(data);
+                },
+                error: function(jqXHR, textStatus, errorThrown) {
+                    if (jqXHR.status === 404) {
+                        createBusinessCardForm(false);
+                    } else {
+                        alert("Error: " + jqXHR.responseText);
+                    }
+                }
+            });
+
+            $("#btnCreateBussinesCard").click(function(event) {
+                event.preventDefault();
+                var businessCard = {
+                    name: $("#businessCardForm #name").val(),
+                    surname: $("#businessCardForm #surname").val(),
+                    position: $("#businessCardForm #position").val(),
+                    phoneNumber: $("#businessCardForm #phoneNumber").val()
+                };
+
+                $.ajax({
+                    url: "/api/businessCards",
+                    type: "POST",
+                    data: JSON.stringify(businessCard),
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json",
+                    success: function (res) {
+                        businessCardObj = data;
+                        fillBusinessCardForm(res);
+                    },
+                    error: function(jqXHR, textStatus, errorThrown) {
+                        if (jqXHR.status === 400) {
+                            createBusinessCardForm(true);
+                        } else {
+                            alert("Error: " + jqXHR.responseText);
+                        }
+                    }
+                });
+            });
+
+            $("#btnUpdateBussinesCard").click(function(event) {
+                event.preventDefault();
+                var businessCard = {
+                    name: $("#businessCardForm #name").val(),
+                    surname: $("#businessCardForm #surname").val(),
+                    position: $("#businessCardForm #position").val(),
+                    phoneNumber: $("#businessCardForm #phoneNumber").val()
+                };
+
+                $.ajax({
+                    url: "/api/businessCards/" + businessCardObj.id,
+                    type: "PUT",
+                    data: JSON.stringify(businessCard),
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json",
+                    success: function (res) {
+                        businessCardObj = data;
+                        fillBusinessCardForm(res);
+                    },
+                    error: function(jqXHR, textStatus, errorThrown) {
+                        if (jqXHR.status === 400) {
+                            createBusinessCardForm(true);
+                        } else {
+                            alert("Error: " + jqXHR.responseText);
+                        }
+                    }
+                });
+            });
+        });
+    </script>
+
+}
