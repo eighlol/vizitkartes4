@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Identity;
@@ -10,8 +11,10 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using BusinessCards.Entities;
+using BusinessCards.Filters;
 using BusinessCards.Seed;
 using BusinessCards.Services;
+using Microsoft.AspNetCore.Authentication.Cookies;
 
 namespace BusinessCards
 {
@@ -34,12 +37,42 @@ namespace BusinessCards
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultTokenProviders();
 
+            services.AddAntiforgery(x => x.HeaderName = "X-XSRF-TOKEN");
+
             services.AddMvc()
                 .AddRazorPagesOptions(options =>
                 {
                     options.Conventions.AuthorizeFolder("/Account/Manage");
                     options.Conventions.AuthorizePage("/Account/Logout");
                 });
+            //services.ConfigureApplicationCookie(options =>
+            //{
+            //    options.LoginPath = new PathString("/Auth/Login");
+            //    options.Events = new CookieAuthenticationEvents()
+            //    {
+            //        OnRedirectToLogin = ctx =>
+            //        {
+            //            if (ctx.Request.Path.StartsWithSegments("/api") && ctx.Response.StatusCode == 200)
+            //            {
+            //                ctx.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
+            //                return Task.FromResult<object>(null);
+            //            }
+            //            else
+            //            {
+            //                ctx.Response.Redirect(ctx.RedirectUri);
+            //                return Task.FromResult<object>(null);
+            //            }
+            //        }
+            //    };
+            //});
+            services.ConfigureApplicationCookie(options =>
+            {
+                options.Events.OnRedirectToLogin = context =>
+                {
+                    context.Response.StatusCode = 401;
+                    return Task.CompletedTask;
+                };
+            });
 
             // Register no-op EmailSender used by account confirmation and password reset during development
             // For more information on how to enable account confirmation and password reset please visit https://go.microsoft.com/fwlink/?LinkID=532713
@@ -69,7 +102,9 @@ namespace BusinessCards
             {
                 cfg.CreateMap<Entities.BusinessCard, Models.BusinessCardDto>().ReverseMap();
                 cfg.CreateMap<Models.BusinessCardForUpdateDto, Entities.BusinessCard>();
-                cfg.CreateMap<Entities.Company, Models.CompanyDto>();
+                cfg.CreateMap<Entities.Company, Models.CompanyDto>()
+                    .ForMember(dest => dest.Manager, opts => opts.MapFrom(src => src.Manager.BusinessCard));
+
                 cfg.CreateMap<Entities.Department, Models.DepartmentDto>().ReverseMap();
                 cfg.CreateMap<Entities.Office, Models.OfficeDto>().ReverseMap();
             });

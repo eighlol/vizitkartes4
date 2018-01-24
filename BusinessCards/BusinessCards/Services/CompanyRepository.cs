@@ -15,7 +15,7 @@ namespace BusinessCards.Services
         }
         public IEnumerable<Company> GetCompanies()
         {
-            return _dbContext.Companies.OrderBy(b => b.Name).ThenBy(tb => tb.Manager.BusinessCard.Name).ToList();
+            return _dbContext.Companies.Include(company => company.Employees).OrderBy(b => b.Name).ToList();
         }
 
         public Company GetUserCompany(ApplicationUser user)

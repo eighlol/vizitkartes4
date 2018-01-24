@@ -5,10 +5,9 @@ namespace BusinessCards.Services
 {
     public interface IManagerRepository
     {
-        void ApproveEmployee(ApplicationUser user);
-        void RemoveEmployee(ApplicationUser user);
+        void UpdateEmployee(ApplicationUser user);
         IEnumerable<ApplicationUser> GetManagers();
-        void AddManager(ApplicationUser manager);
+        void RemoveEmployeeFromCompany(Company company, int businessCardId);
         bool Save();
     }
 }

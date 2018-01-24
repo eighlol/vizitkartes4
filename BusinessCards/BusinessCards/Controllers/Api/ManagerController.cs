@@ -11,7 +11,7 @@ using Models;
 
 namespace BusinessCards.Controllers.Api
 {
-    [Authorize(Roles = "CompanyManager, Administrator")]
+    [Authorize(Roles = "CompanyManager")]
     [Route("api/company")]
     public class ManagerController : Controller
     {
@@ -32,8 +32,28 @@ namespace BusinessCards.Controllers.Api
             _businessCardRepository = businessCardRepository;
         }
 
+
+
+        [HttpDelete("{id}/employee/{businessCardId}")]
+        public IActionResult DeleteEmployee(int id, int businessCardId)
+        {
+            var company = _companyRepository.GetCompany(id);
+            if (company == null)
+            {
+                return NotFound("Company does not exist.");
+            }
+            
+            _managerRepository.RemoveEmployeeFromCompany(company, businessCardId);
+           
+            if (!_managerRepository.Save())
+            {
+                return StatusCode(500, "A problem happened while handling your request.");
+            }
+            return NoContent();
+        }
+
         [HttpPut("{id}/employee")]
-        public IActionResult ApproveEmployee(int id, [FromBody] EmployeeForUpdateDto employeeForUpdateDto)
+        public IActionResult ApproveOrRejectEmployee(int id, [FromBody] EmployeeForUpdateDto employeeForUpdateDto)
         {
             if (!ModelState.IsValid)
             {
@@ -47,14 +67,15 @@ namespace BusinessCards.Controllers.Api
             var company = _companyRepository.GetCompany(id);
             if (businessCard.User.Company == company && businessCard.User.EmployeeStatus == EmployeeStatus.NotApproved)
             {
-                _managerRepository.ApproveEmployee(businessCard.User);
+                businessCard.User.EmployeeStatus = employeeForUpdateDto.Status;
+                _managerRepository.UpdateEmployee(businessCard.User);
                 if (_managerRepository.Save())
                 {
                     return NoContent();
                 }
                 else
                 {
-                    _logger.LogError($"Failed to add employee with user id {businessCard.User.Id} to company {company.Id}.");
+                    _logger.LogError($"Failed to update employee with user id {businessCard.User.Id} for company {company.Id}.");
                     return StatusCode(500, "A problem happened while handling your request.");
                 }
             }

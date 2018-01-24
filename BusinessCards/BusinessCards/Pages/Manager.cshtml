@@ -1,0 +1,60 @@
+﻿@page
+@model ManagerModel
+@{
+    ViewData["Title"] = "Manager";
+}
+@if (User.Identity.IsAuthenticated && User.IsInRole("CompanyManager"))
+{
+    <h2>@ViewData["Title"]</h2>
+    <h3>@Model.Message</h3>
+    <div id="companies">
+        <div class="row">
+            <div class="col-md-12">
+                <h4>Title</h4>
+                <p>Description</p>
+            </div>
+        </div>
+    </div>
+
+@section Scripts {
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+
+    <script type="text/javascript">
+
+        $(document).ready(function () {
+            var token = Cookies.get("XSRF-TOKEN");
+            function renderCompanies(companies) {
+                $("#companies").html("");
+                $.each(companies,
+                    function(index, element) {
+                        $('<div class="row">')
+                            .append(
+                                $('<div class="col-md-12">')
+                                .append($('<h4>').html(element.name))
+                                .append($('<p>').html(element.description))
+                                .append($('<p>').html('Resource: ' + element.externalResource))
+                            )
+                            .appendTo($("#companies"));
+                    });
+            }
+
+            $.ajax({
+                type: "GET",
+                url: "/api/company",
+                dataType: "json",
+                headers: {
+                    "X-XSRF-TOKEN": token
+                },
+                success: function(data) {
+                    renderCompanies(data);
+                },
+                error: function(jqXHR, textStatus, errorThrown) {
+                    alert("Error: " + jqXHR.responseText);
+                }
+            });
+
+        });
+    </script>
+
+}
+}

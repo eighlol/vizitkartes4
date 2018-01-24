@@ -32,7 +32,11 @@
                 <ul class="nav navbar-nav">
                     <li><a asp-page="/Index">Home</a></li>
                     <li><a asp-page="/BusinessCard">My business card</a></li>
-                    <li><a asp-page="/Contact">Contact</a></li>
+                    <li><a asp-page="/Company">Companies</a></li>
+                    @if (User.Identity.IsAuthenticated && User.IsInRole("CompanyManager"))
+                    {
+                    <li><a asp-page="/Manager">Manager</a></li>
+                    }
                 </ul>
                 @await Html.PartialAsync("_LoginPartial")
             </div>
@@ -45,7 +49,7 @@
             <p>&copy; 2017 - BusinessCards</p>
         </footer>
     </div>
-
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/js-cookie/2.1.4/js.cookie.min.js"></script>
     <environment include="Development">
         <script src="~/lib/jquery/dist/jquery.js"></script>
         <script src="~/lib/bootstrap/dist/js/bootstrap.js"></script>

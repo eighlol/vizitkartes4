@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using BusinessCards.Entities;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
 namespace BusinessCards.Services
 {
@@ -27,23 +28,21 @@ namespace BusinessCards.Services
             //return _dbContext.Managers.OrderBy(manager => manager.UserName).ToList();
         }
 
-        public void ApproveEmployee(ApplicationUser user)
+        public void RemoveEmployeeFromCompany(Company company, int businessCardId)
         {
-            var employeeStatus = EmployeeStatus.Approved;
-            var dbUser = _dbContext.Users.FirstOrDefault(applicationUser => applicationUser == user);
-            dbUser.EmployeeStatus = EmployeeStatus.Approved;
+            var businessCard = _dbContext.BusinessCards.Include(card => card.User).FirstOrDefault(card => card.Id.Equals(businessCardId));
+            if (businessCard != null && businessCard.User != null)
+            {
+                company.Employees.Remove(businessCard.User);
+                businessCard.User.EmployeeStatus = EmployeeStatus.None;
+            }
         }
 
-        public void RemoveEmployee(ApplicationUser user)
+        public void UpdateEmployee(ApplicationUser user)
         {
-            throw new System.NotImplementedException();
+            _dbContext.Users.Update(user);
         }
 
-        public void AddManager(ApplicationUser manager)
-        {
-            //_dbContext.Managers.Add(manager);
-            //_dbContext.SaveChanges();
-        }
         public bool Save()
         {
             return (_dbContext.SaveChanges() >= 0);

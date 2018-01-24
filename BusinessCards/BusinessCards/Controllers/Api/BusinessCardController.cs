@@ -11,7 +11,8 @@ using Models;
 
 namespace BusinessCards.Controllers.Api
 {
-    [Authorize]
+
+    [ValidateAntiForgeryToken]
     [Route("api/businessCards")]
     public class BusinessCardController : Controller
     {
@@ -26,14 +27,8 @@ namespace BusinessCards.Controllers.Api
             _userManager = userManager;
         }
 
-        //[HttpGet()]
-        //public IActionResult GetBusinessCards()
-        //{
-        //    var businessCards = Mapper.Map<IEnumerable<BusinessCardDto>>(_businessCardRepository.GetBusinessCards());
-        //    return Ok(businessCards);
-        //}
-
-        [HttpGet()]
+        [Authorize]
+        [HttpGet("my")]
         public IActionResult GetMyBusinessCard()
         {
             var userId = _userManager.GetUserId(User);
@@ -48,6 +43,14 @@ namespace BusinessCards.Controllers.Api
             return Ok(businessCardDto);
         }
 
+        [HttpGet()]
+        public IActionResult GetBusinessCards()
+        {
+            var businessCards = _businessCardRepository.GetBusinessCards();
+            return Ok(Mapper.Map<IEnumerable<BusinessCardDto>>(businessCards));
+        }
+
+        [Authorize]
         [HttpPost()]
         public async Task<IActionResult> CreateBusinessCard([FromBody]BusinessCardDto businessCardRequest)
         {
@@ -69,10 +72,11 @@ namespace BusinessCards.Controllers.Api
             return Ok(Mapper.Map<BusinessCardDto>(businessCard));
         }
 
+        [Authorize]
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateBusinessCard(int id, [FromBody] BusinessCardForUpdateDto businessCardDto)
+        public IActionResult UpdateBusinessCard(int id, [FromBody] BusinessCardForUpdateDto businessCardDto)
         {
-            var user = await _userManager.GetUserAsync(User);
+            //var user = await _userManager.GetUserAsync(User);
 
             if (!ModelState.IsValid)
             {

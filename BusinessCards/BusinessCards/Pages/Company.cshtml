@@ -1,10 +1,17 @@
 ﻿@page
-@model IndexModel
+@model CompanyModel
 @{
-    ViewData["Title"] = "Home page";
+    ViewData["Title"] = "Companies";
 }
-<div id="businessCards">
-
+<h2>@ViewData["Title"]</h2>
+<h3>@Model.Message</h3>
+<div id="companies">
+    <div class="row">
+        <div class="col-md-12">
+            <h4>Title</h4>
+            <p>Description</p>
+        </div>
+    </div>
 </div>
 
 @section Scripts {
@@ -14,31 +21,30 @@
 
         $(document).ready(function () {
             var token = Cookies.get("XSRF-TOKEN");
-            function renderBusinessCards(companies) {
-                $("#businessCards").html("");
+            function renderCompanies(companies) {
+                $("#companies").html("");
                 $.each(companies,
                     function (index, element) {
                         $('<div class="row">')
                             .append(
                             $('<div class="col-md-12">')
-                                .append('<hr />')
-                                .append($('<h4>').html(element.name + ' ' + element.surname))
-                                .append($('<p>').html('Posistion: ' + element.position))
-                                .append($('<p>').html('Phone number: ' + element.phoneNumber))
+                                .append($('<h4>').html(element.name))
+                                .append($('<p>').html(element.description))
+                                .append($('<p>').html('Resource: ' + element.externalResource))
                             )
-                            .appendTo($("#businessCards"));
+                            .appendTo($("#companies"));
                     });
             }
 
             $.ajax({
                 type: "GET",
-                url: "/api/businessCards",
+                url: "/api/company",
                 dataType: "json",
                 headers: {
                     "X-XSRF-TOKEN": token
                 },
                 success: function (data) {
-                    renderBusinessCards(data);
+                    renderCompanies(data);
                 },
                 error: function (jqXHR, textStatus, errorThrown) {
                     alert("Error: " + jqXHR.responseText);

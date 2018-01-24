@@ -38,7 +38,9 @@
     <script type="text/javascript">
 
         $(document).ready(function () {
+            var token = Cookies.get("XSRF-TOKEN");
             var businessCardObj = {};
+
             function createBusinessCardForm(isEditable) {
                 if (isEditable) {
                     $("#businessCardForm #btnUpdateBussinesCard").show();
@@ -60,9 +62,12 @@
 
             $.ajax({
                 type: "GET",
-                url: "/api/businessCards",
+                url: "/api/businessCards/my",
                 dataType: "json",
-                success: function (data) {
+                headers: {
+                    "X-XSRF-TOKEN": token
+                },
+                success: function(data) {
                     businessCardObj = data;
                     createBusinessCardForm(true);
                     fillBusinessCardForm(data);
@@ -70,70 +75,84 @@
                 error: function(jqXHR, textStatus, errorThrown) {
                     if (jqXHR.status === 404) {
                         createBusinessCardForm(false);
+                    } else if (jqXHR.status === 401) {
+                        alert("Please log in!");
+                        window.location.href = '/';
+                    } else {
+                        alert("Error: " + jqXHR.responseText);
+                    }
+                }
+        });
+
+        $("#btnCreateBussinesCard").click(function(event) {
+            event.preventDefault();
+            var businessCard = {
+                name: $("#businessCardForm #name").val(),
+                surname: $("#businessCardForm #surname").val(),
+                position: $("#businessCardForm #position").val(),
+                phoneNumber: $("#businessCardForm #phoneNumber").val()
+            };
+
+            $.ajax({
+                url: "/api/businessCards",
+                type: "POST",
+                data: JSON.stringify(businessCard),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                headers: {
+                    "X-XSRF-TOKEN": token
+                },
+                success: function(res) {
+                    businessCardObj = res;
+                    fillBusinessCardForm(res);
+                },
+                error: function(jqXHR, textStatus, errorThrown) {
+                    if (jqXHR.status === 400) {
+                        createBusinessCardForm(true);
+                    } else if (jqXHR.status === 401) {
+                        alert("Please log in!");
+                        window.location.href = '/';
                     } else {
                         alert("Error: " + jqXHR.responseText);
                     }
                 }
             });
+        });
 
-            $("#btnCreateBussinesCard").click(function(event) {
-                event.preventDefault();
-                var businessCard = {
-                    name: $("#businessCardForm #name").val(),
-                    surname: $("#businessCardForm #surname").val(),
-                    position: $("#businessCardForm #position").val(),
-                    phoneNumber: $("#businessCardForm #phoneNumber").val()
-                };
+        $("#btnUpdateBussinesCard").click(function(event) {
+            event.preventDefault();
+            var businessCard = {
+                name: $("#businessCardForm #name").val(),
+                surname: $("#businessCardForm #surname").val(),
+                position: $("#businessCardForm #position").val(),
+                phoneNumber: $("#businessCardForm #phoneNumber").val()
+            };
 
-                $.ajax({
-                    url: "/api/businessCards",
-                    type: "POST",
-                    data: JSON.stringify(businessCard),
-                    contentType: "application/json; charset=utf-8",
-                    dataType: "json",
-                    success: function (res) {
-                        businessCardObj = data;
-                        fillBusinessCardForm(res);
-                    },
-                    error: function(jqXHR, textStatus, errorThrown) {
-                        if (jqXHR.status === 400) {
-                            createBusinessCardForm(true);
-                        } else {
-                            alert("Error: " + jqXHR.responseText);
-                        }
+            $.ajax({
+                url: "/api/businessCards/" + businessCardObj.id,
+                type: "PUT",
+                data: JSON.stringify(businessCard),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                headers: {
+                    "X-XSRF-TOKEN": token
+                },
+                success: function(res) {
+                    businessCardObj = businessCard;
+                },
+                error: function(jqXHR, textStatus, errorThrown) {
+                    if (jqXHR.status === 400) {
+                        createBusinessCardForm(true);
+                    } else if (jqXHR.status === 401) {
+                        alert("Please log in!");
+                        window.location.href = '/';
+                    } else {
+                        alert("Error: " + jqXHR.responseText);
                     }
-                });
-            });
-
-            $("#btnUpdateBussinesCard").click(function(event) {
-                event.preventDefault();
-                var businessCard = {
-                    name: $("#businessCardForm #name").val(),
-                    surname: $("#businessCardForm #surname").val(),
-                    position: $("#businessCardForm #position").val(),
-                    phoneNumber: $("#businessCardForm #phoneNumber").val()
-                };
-
-                $.ajax({
-                    url: "/api/businessCards/" + businessCardObj.id,
-                    type: "PUT",
-                    data: JSON.stringify(businessCard),
-                    contentType: "application/json; charset=utf-8",
-                    dataType: "json",
-                    success: function (res) {
-                        businessCardObj = data;
-                        fillBusinessCardForm(res);
-                    },
-                    error: function(jqXHR, textStatus, errorThrown) {
-                        if (jqXHR.status === 400) {
-                            createBusinessCardForm(true);
-                        } else {
-                            alert("Error: " + jqXHR.responseText);
-                        }
-                    }
-                });
+                }
             });
         });
+    });
     </script>
 
 }
