@@ -12,7 +12,6 @@ using Models;
 namespace BusinessCards.Controllers.Api
 {
 
-    [ValidateAntiForgeryToken]
     [Route("api/businessCards")]
     public class BusinessCardController : Controller
     {
@@ -42,6 +41,20 @@ namespace BusinessCards.Controllers.Api
             var businessCardDto = Mapper.Map<BusinessCardDto>(businessCard);
             return Ok(businessCardDto);
         }
+        
+        [HttpGet("{id}")]
+        public IActionResult GetBusinessCard(int id)
+        {
+            var businessCard = _businessCardRepository.GetBusinessCard(id);
+            if (businessCard == null)
+            {
+                _logger.LogInformation("Business card wasn't found.");
+                return NotFound("Business card not found!");
+            }
+
+            var businessCardDto = Mapper.Map<BusinessCardDto>(businessCard);
+            return Ok(businessCardDto);
+        }
 
         [HttpGet()]
         public IActionResult GetBusinessCards()
@@ -50,6 +63,8 @@ namespace BusinessCards.Controllers.Api
             return Ok(Mapper.Map<IEnumerable<BusinessCardDto>>(businessCards));
         }
 
+
+        [ValidateAntiForgeryToken]
         [Authorize]
         [HttpPost()]
         public async Task<IActionResult> CreateBusinessCard([FromBody]BusinessCardDto businessCardRequest)
@@ -72,6 +87,8 @@ namespace BusinessCards.Controllers.Api
             return Ok(Mapper.Map<BusinessCardDto>(businessCard));
         }
 
+
+        [ValidateAntiForgeryToken]
         [Authorize]
         [HttpPut("{id}")]
         public IActionResult UpdateBusinessCard(int id, [FromBody] BusinessCardForUpdateDto businessCardDto)

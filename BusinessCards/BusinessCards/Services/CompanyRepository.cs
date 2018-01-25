@@ -20,7 +20,7 @@ namespace BusinessCards.Services
 
         public Company GetUserCompany(ApplicationUser user)
         {
-            return _dbContext.Users.FirstOrDefault(u => u == user)?.Company;
+            return _dbContext.Users.Include(i => i.Company).FirstOrDefault(u => u == user)?.Company;
         }
 
         public Company GetCompany(int id)
@@ -31,6 +31,11 @@ namespace BusinessCards.Services
         public IEnumerable<BusinessCard> GetCompanyEmployees(Company company)
         {
             return _dbContext.Users.Where(user => user.Company == company).Select(user => user.BusinessCard).ToList();
+        }
+
+        public IEnumerable<ApplicationUser> GetCompanyUsers(Company company)
+        {
+            return _dbContext.Users.Include(i => i.BusinessCard).Where(u => u.Company == company).ToList();
         }
 
         public void MakeCompanyEmployee(ApplicationUser user, int companyId)

@@ -1,0 +1,160 @@
+﻿@page
+@model AdministratorModel
+@{
+    ViewData["Title"] = "Home page";
+}
+@if (User.Identity.IsAuthenticated && User.IsInRole("Administrator"))
+{
+    <div class="row">
+        <div class="col-md-6">
+            <h3>Approved employees</h3>
+            <div id="approvedEmployes">
+
+            </div>
+        </div>
+        <div class="col-md-6">
+            <h3>Managers</h3>
+            <div id="managersList">
+
+            </div>
+        </div>
+
+    </div>
+
+
+@section Scripts {
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+
+    <script type="text/javascript">
+
+        $(document).ready(function() {
+            var token = Cookies.get("XSRF-TOKEN");
+
+            getEmployees();
+
+            getManagers();
+
+            function renderBusinessCards(companies) {
+                $("#approvedEmployes").html("");
+                $.each(companies,
+                    function(index, element) {
+                        $('<div class="row">')
+                            .append(
+                                $('<div class="col-md-12">')
+                                .append('<hr />')
+                                .append($('<h4>').html(element.name + ' ' + element.surname))
+                                .append($('<p>').html('Posistion: ' + element.position))
+                                .append($('<p>').html('Phone number: ' + element.phoneNumber))
+                                .append($('<button type="button" value=' +
+                                    element.id +
+                                    ' class="makeManager btn btn-success">Make manager</button> '))
+                            )
+                            .appendTo($("#approvedEmployes"));
+                    });
+                assignEmployeeButtonEvents();
+            }
+
+            function renderManagers(companies) {
+                $("#managersList").html("");
+                $.each(companies,
+                    function(index, element) {
+                        $('<div class="row">')
+                            .append(
+                                $('<div class="col-md-12">')
+                                .append('<hr />')
+                                .append($('<h4>').html(element.name + ' ' + element.surname))
+                                .append($('<p>').html('Posistion: ' + element.position))
+                                .append($('<p>').html('Phone number: ' + element.phoneNumber))
+                                .append($('<button type="button" value=' +
+                                    element.businessCardId +
+                                    ' class="removeManager btn btn-warning">Remove</button> '))
+                            )
+                            .appendTo($("#managersList"));
+                    });
+                assignManagerButtonEvents();
+            }
+
+            function getEmployees() {
+                $.ajax({
+                    type: "GET",
+                    url: "/api/administrator/employees",
+                    dataType: "json",
+                    headers: {
+                        "X-XSRF-TOKEN": token
+                    },
+                    success: function(data) {
+                        renderBusinessCards(data);
+                    },
+                    error: function(jqXHR, textStatus, errorThrown) {
+                        alert("Error: " + jqXHR.responseText);
+                    }
+                });
+            }
+
+            function getManagers() {
+                $.ajax({
+                    type: "GET",
+                    url: "/api/administrator/managers",
+                    dataType: "json",
+                    headers: {
+                        "X-XSRF-TOKEN": token
+                    },
+                    success: function(data) {
+                        renderManagers(data);
+                    },
+                    error: function(jqXHR, textStatus, errorThrown) {
+                        alert("Error: " + jqXHR.responseText);
+                    }
+                });
+            }
+
+            function assignManagerButtonEvents() {
+                $(".removeManager").click(function(event) {
+                    event.preventDefault();
+                    var businessCardId = $(this).prop("value");
+                    $.ajax({
+                        type: "DELETE",
+                        url: "/api/administrator/managers/" + businessCardId,
+                        dataType: "json",
+                        headers: {
+                            "X-XSRF-TOKEN": token
+                        },
+                        success: function(data) {
+                            getManagers();
+                            getEmployees();
+                        },
+                        error: function(jqXHR, textStatus, errorThrown) {
+                            alert("Error: " + jqXHR.responseText);
+                        }
+                    });
+                });
+            }
+
+            function assignEmployeeButtonEvents() {
+                $(".makeManager").click(function(event) {
+                    event.preventDefault();
+                    var businessCardId = $(this).prop("value");
+                    $.ajax({
+                        type: "POST",
+                        url: "/api/administrator/managers/" + businessCardId,
+                        dataType: "json",
+                        headers: {
+                            "X-XSRF-TOKEN": token
+                        },
+                        success: function() {
+                            getEmployees();
+                            getManagers();
+
+                        },
+                        error: function(jqXHR, textStatus, errorThrown) {
+                            alert("Error: " + jqXHR.responseText);
+                        }
+                    });
+                });
+            }
+
+        });
+    </script>
+
+}
+}

@@ -32,9 +32,22 @@ namespace BusinessCards.Controllers.Api
             _businessCardRepository = businessCardRepository;
         }
 
+        [HttpGet("{id}/employees")]
+        public IActionResult GetCompanyEmployees(int id)
+        {
+            var company = _companyRepository.GetCompany(id);
+            if (company == null)
+            {
+                _logger.LogInformation($"Company with id {id} wasn't found.");
+                return NotFound();
+            }
+            var companyUsers = _companyRepository.GetCompanyUsers(company);
+
+            return Ok(Mapper.Map<IEnumerable<EmployeeDto>>(companyUsers));
+        }
 
 
-        [HttpDelete("{id}/employee/{businessCardId}")]
+        [HttpDelete("{id}/employees/{businessCardId}")]
         public IActionResult DeleteEmployee(int id, int businessCardId)
         {
             var company = _companyRepository.GetCompany(id);
@@ -52,7 +65,7 @@ namespace BusinessCards.Controllers.Api
             return NoContent();
         }
 
-        [HttpPut("{id}/employee")]
+        [HttpPut("{id}/employees")]
         public IActionResult ApproveOrRejectEmployee(int id, [FromBody] EmployeeForUpdateDto employeeForUpdateDto)
         {
             if (!ModelState.IsValid)

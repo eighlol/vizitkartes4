@@ -14,5 +14,7 @@ namespace BusinessCards.Services
         BusinessCard GetBusinessCard(string userId);
         bool Save();
         void Update(BusinessCard businessCard);
+        IEnumerable<BusinessCard> GetBusinessCardsWithApprovedStatus();
+        ApplicationUser GetApplicationUser(int businessCardId);
     }
 }

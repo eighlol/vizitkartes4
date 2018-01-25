@@ -7,13 +7,8 @@
 {
     <h2>@ViewData["Title"]</h2>
     <h3>@Model.Message</h3>
-    <div id="companies">
-        <div class="row">
-            <div class="col-md-12">
-                <h4>Title</h4>
-                <p>Description</p>
-            </div>
-        </div>
+    <div id="companyEmployees">
+
     </div>
 
 @section Scripts {
@@ -21,37 +16,142 @@
 
     <script type="text/javascript">
 
-        $(document).ready(function () {
+        $(document).ready(function() {
             var token = Cookies.get("XSRF-TOKEN");
-            function renderCompanies(companies) {
-                $("#companies").html("");
-                $.each(companies,
-                    function(index, element) {
-                        $('<div class="row">')
-                            .append(
-                                $('<div class="col-md-12">')
-                                .append($('<h4>').html(element.name))
-                                .append($('<p>').html(element.description))
-                                .append($('<p>').html('Resource: ' + element.externalResource))
-                            )
-                            .appendTo($("#companies"));
-                    });
-            }
+            var employees = {};
+            var companyId;
 
             $.ajax({
                 type: "GET",
-                url: "/api/company",
+                url: "api/identification/whoAmI",
                 dataType: "json",
                 headers: {
                     "X-XSRF-TOKEN": token
                 },
-                success: function(data) {
-                    renderCompanies(data);
+                success: function (data) {
+                    companyId = data.companyId;
+                    getEmployees(data.companyId);
                 },
                 error: function(jqXHR, textStatus, errorThrown) {
-                    alert("Error: " + jqXHR.responseText);
+                    if (jqXHR.status === 401 || jqXHR.status === 404) {
+                        alert("Please log in!");
+                        window.location.href = '/';
+                    } else {
+                        alert("Error: " + jqXHR.responseText);
+                    }
                 }
             });
+
+
+            function renderBusinessCards(companies) {
+                $("#companyEmployees").html("");
+                $.each(companies,
+                    function (index, element) {
+                        $('<div class="row">')
+                            .append(
+                                $('<div class="col-md-12">')
+                                .append('<hr />')
+                                .append($('<h4>').html(element.name + ' ' + element.surname))
+                                .append($('<p>').html('Posistion: ' + element.position))
+                                .append($('<p>').html('Phone number: ' + element.phoneNumber))
+                                .append($('<p>').html('Status: ' + (element.employeeStatus === "NotApproved" ? "Not approved" : element.employeeStatus)))
+                                .append('<div class="btn-toolbar">')
+                            )
+                            .appendTo($("#companyEmployees"));
+                        if (element.employeeStatus !== "Manager") {
+                            if (element.employeeStatus === "NotApproved") {
+                                $("#companyEmployees .row:last .col-md-12 .btn-toolbar")
+                                .append($('<button type="button" value=' + element.businessCardId + ' class="rejectEmployee btn btn-warning">Reject</button> '))
+                                .append($('<button type="button" value=' + element.businessCardId + ' class="approveEmployee btn btn-success">Approve</button> '));
+                            }
+                            $("#companyEmployees .row:last .col-md-12 .btn-toolbar").append($('<button type="button" value=' + element.businessCardId + ' class="deleteEmployee btn btn-danger">Delete</button>'));
+                        }
+                    });
+                assignButtonEvents();
+            }
+
+            function getEmployees(companyId) {
+                if (companyId) {
+                    $.ajax({
+                        type: "GET",
+                        url: "/api/company/" + companyId + "/employees",
+                        dataType: "json",
+                        headers: {
+                            "X-XSRF-TOKEN": token
+                        },
+                        success: function (data) {
+                            employees = data;
+                            renderBusinessCards(data);
+                        },
+                        error: function(jqXHR, textStatus, errorThrown) {
+                            alert("Error: " + jqXHR.responseText);
+                        }
+                    });
+                } else {
+                    alert("You are not assigned to any company.");
+                }
+            }
+
+            function assignButtonEvents() {
+                $(".rejectEmployee").click(function (event) {
+                    event.preventDefault();
+                    var businessCardId = $(this).prop("value");
+                    var rejObj = {
+                        businessCardId: businessCardId,
+                        employeeStatus: 2
+                    }
+                    changeEmployeeStatusAjax(rejObj);
+                });
+
+                $(".approveEmployee").click(function (event) {
+                    event.preventDefault();
+                    var businessCardId = $(this).prop("value");
+                    var apprObj = {
+                        businessCardId: businessCardId,
+                        employeeStatus: 0
+                    }
+                    changeEmployeeStatusAjax(apprObj);
+                });
+
+                $(".deleteEmployee").click(function (event) {
+                    console.log(3);
+                    event.preventDefault();
+                    var businessCardId = $(this).prop("value");
+                    $.ajax({
+                        type: "DELETE",
+                        url: "/api/company/" + companyId + "/employees/" + businessCardId,
+                        dataType: "json",
+                        headers: {
+                            "X-XSRF-TOKEN": token
+                        },
+                        success: function (data) {
+                            getEmployees(companyId);
+                        },
+                        error: function (jqXHR, textStatus, errorThrown) {
+                            alert("Error: " + jqXHR.responseText);
+                        }
+                    });
+                });
+            }
+
+            function changeEmployeeStatusAjax(data) {
+                $.ajax({
+                    url: "/api/company/" + companyId + "/employees",
+                    type: "PUT",
+                    data: JSON.stringify(data),
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json",
+                    headers: {
+                        "X-XSRF-TOKEN": token
+                    },
+                    success: function(res) {
+                        getEmployees(companyId);
+                    },
+                    error: function(jqXHR, textStatus, errorThrown) {
+                        alert("Error: " + jqXHR.responseText);
+                    }
+                });
+            }
 
         });
     </script>

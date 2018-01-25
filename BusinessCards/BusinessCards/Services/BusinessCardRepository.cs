@@ -20,6 +20,18 @@ namespace BusinessCards.Services
             return _dbContext.BusinessCards.OrderBy(b => b.Name).ThenBy(tb => tb.Surname).ToList();
         }
 
+        public IEnumerable<BusinessCard> GetBusinessCardsWithApprovedStatus()
+        {
+            return _dbContext.BusinessCards.Include(i => i.User).Where(b => b.User.EmployeeStatus == EmployeeStatus.Approved
+                                                                            ).OrderBy(b => b.Name).ThenBy(tb => tb.Surname).ToList();
+        }
+
+        public ApplicationUser GetApplicationUser(int businessCardId)
+        {
+            var businessCard = _dbContext.BusinessCards.Include(i => i.User).FirstOrDefault(card => card.Id.Equals(businessCardId));
+            return businessCard?.User;
+        }
+
         public BusinessCard GetBusinessCard(int businessCardId)
         {
             return _dbContext.BusinessCards

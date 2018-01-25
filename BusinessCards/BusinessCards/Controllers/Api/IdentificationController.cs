@@ -42,7 +42,8 @@ namespace BusinessCards.Controllers.Api
             var res = new WhoAmIDto
             {
                 BusinessCardId = businessCard?.Id,
-                CompanyId = userCompany?.Id
+                CompanyId = userCompany?.Id,
+                EmployeeStatus = user.EmployeeStatus == EmployeeStatus.NotApproved ? "Not approved" : user.EmployeeStatus.ToString()
             };
 
             return Ok(res);

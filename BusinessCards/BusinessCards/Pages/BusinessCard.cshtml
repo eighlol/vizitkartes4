@@ -7,7 +7,7 @@
 <h3>@Model.Message</h3>
 <div>
     <div class="row">
-        <div class="col-md-4">
+        <div class="col-md-6">
             <form id="businessCardForm">
                 <div class="form-group">
                     <label for="name">Name</label>
@@ -29,6 +29,11 @@
                 <button id="btnUpdateBussinesCard" class="btn btn-default">Update</button>
 
             </form>
+        </div>
+        <div id="companyInfo" class="col-md-6">
+            
+            
+
         </div>
     </div>
 </div>
@@ -62,27 +67,81 @@
 
             $.ajax({
                 type: "GET",
-                url: "/api/businessCards/my",
+                url: "api/identification/whoAmI",
                 dataType: "json",
                 headers: {
                     "X-XSRF-TOKEN": token
                 },
                 success: function(data) {
-                    businessCardObj = data;
-                    createBusinessCardForm(true);
-                    fillBusinessCardForm(data);
+                    getBusinessCard(data.businessCardId);
+                    getCompany(data);
                 },
                 error: function(jqXHR, textStatus, errorThrown) {
-                    if (jqXHR.status === 404) {
-                        createBusinessCardForm(false);
-                    } else if (jqXHR.status === 401) {
+                    if (jqXHR.status === 401 || jqXHR.status === 404) {
                         alert("Please log in!");
                         window.location.href = '/';
                     } else {
                         alert("Error: " + jqXHR.responseText);
                     }
                 }
-        });
+            });
+
+            function getBusinessCard(id) {
+                if (id) {
+                    $.ajax({
+                        type: "GET",
+                        url: "/api/businessCards/" + id,
+                        dataType: "json",
+                        headers: {
+                            "X-XSRF-TOKEN": token
+                        },
+                        success: function(data) {
+                            businessCardObj = data;
+                            createBusinessCardForm(true);
+                            fillBusinessCardForm(data);
+                        },
+                        error: function(jqXHR, textStatus, errorThrown) {
+                            if (jqXHR.status === 404) {
+                                createBusinessCardForm(false);
+                            } else if (jqXHR.status === 401) {
+                                alert("Please log in!");
+                                window.location.href = '/';
+                            } else {
+                                alert("Error: " + jqXHR.responseText);
+                            }
+                        }
+                    });
+                }
+                
+            }
+
+            function getCompany(mydata) {
+                if (mydata.companyId) {
+                    $.ajax({
+                        type: "GET",
+                        url: "/api/company/" + mydata.companyId,
+                        dataType: "json",
+                        headers: {
+                            "X-XSRF-TOKEN": token
+                        },
+                        success: function (data) {
+                            $("#companyInfo")
+                                .append($('<h4>').html(data.name))
+                                .append($('<p>').html(data.description))
+                                .append($('<p>').html('Resource: ' + data.externalResource))
+                                .append($('<p>').html('My status: ' + mydata.employeeStatus))
+                                ;
+                        },
+                        error: function (jqXHR, textStatus, errorThrown) {
+                            if (jqXHR.status !== 404) {
+                                alert("Error: " + jqXHR.responseText);
+                            }
+                        }
+                    });
+                }
+            }
+
+            
 
         $("#btnCreateBussinesCard").click(function(event) {
             event.preventDefault();
@@ -104,6 +163,7 @@
                 },
                 success: function(res) {
                     businessCardObj = res;
+                    createBusinessCardForm(true);
                     fillBusinessCardForm(res);
                 },
                 error: function(jqXHR, textStatus, errorThrown) {

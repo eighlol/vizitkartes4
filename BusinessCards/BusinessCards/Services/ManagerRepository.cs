@@ -22,10 +22,12 @@ namespace BusinessCards.Services
 
         public IEnumerable<ApplicationUser> GetManagers()
         {
-            var users = _dbContext.Users.Where(user => user.Company != null).ToList();
+            var users = _dbContext.Users
+                .Include(i => i.Company)
+                .Include(i => i.BusinessCard)
+                .Where(user => user.Company != null && user.EmployeeStatus == EmployeeStatus.Manager).ToList();
 
             return users;
-            //return _dbContext.Managers.OrderBy(manager => manager.UserName).ToList();
         }
 
         public void RemoveEmployeeFromCompany(Company company, int businessCardId)

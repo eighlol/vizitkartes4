@@ -80,6 +80,7 @@ namespace BusinessCards
             services.AddScoped<IBusinessCardRepository, BusinessCardRepository>();
             services.AddScoped<ICompanyRepository, CompanyRepository>();
             services.AddScoped<IManagerRepository, ManagerRepository>();
+            services.AddScoped<IAdministratorRepository, AdministratorRepository>();
             services.AddTransient<BusinessCardDbSeed>();
             //services.AddCors();
         }
@@ -107,6 +108,13 @@ namespace BusinessCards
 
                 cfg.CreateMap<Entities.Department, Models.DepartmentDto>().ReverseMap();
                 cfg.CreateMap<Entities.Office, Models.OfficeDto>().ReverseMap();
+                cfg.CreateMap<ApplicationUser, Models.EmployeeDto>()
+                    .ForMember(dest => dest.BusinessCardId, opts => opts.MapFrom(src => src.BusinessCard.Id))
+                    .ForMember(dest => dest.Name, opts => opts.MapFrom(src => src.BusinessCard.Name))
+                    .ForMember(dest => dest.Surname, opts => opts.MapFrom(src => src.BusinessCard.Surname))
+                    .ForMember(dest => dest.PhoneNumber, opts => opts.MapFrom(src => src.BusinessCard.PhoneNumber))
+                    .ForMember(dest => dest.Position, opts => opts.MapFrom(src => src.BusinessCard.Position))
+                    .ForMember(dest => dest.EmployeeStatus, opts => opts.MapFrom(src => src.EmployeeStatus.ToString()));
             });
 
             app.UseStaticFiles();

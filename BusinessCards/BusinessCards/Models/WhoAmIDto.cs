@@ -7,5 +7,7 @@ namespace Models
         public int? CompanyId { get; set; }
      
         public int? BusinessCardId { get; set; }
+
+        public string EmployeeStatus { get; set; }
     }
 }

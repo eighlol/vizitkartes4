@@ -19,21 +19,26 @@
 
     <script type="text/javascript">
 
-        $(document).ready(function () {
+        $(document).ready(function() {
             var token = Cookies.get("XSRF-TOKEN");
+
             function renderCompanies(companies) {
                 $("#companies").html("");
                 $.each(companies,
-                    function (index, element) {
+                    function(index, element) {
                         $('<div class="row">')
                             .append(
-                            $('<div class="col-md-12">')
+                                $('<div class="col-md-12">')
                                 .append($('<h4>').html(element.name))
                                 .append($('<p>').html(element.description))
                                 .append($('<p>').html('Resource: ' + element.externalResource))
+                                .append($('<button type="button" value=' +
+                                    element.id +
+                                    ' class="beEmployee btn btn-success">Send request to join company</button> '))
                             )
                             .appendTo($("#companies"));
                     });
+                assignButtonEvents();
             }
 
             $.ajax({
@@ -43,13 +48,34 @@
                 headers: {
                     "X-XSRF-TOKEN": token
                 },
-                success: function (data) {
+                success: function(data) {
                     renderCompanies(data);
                 },
-                error: function (jqXHR, textStatus, errorThrown) {
+                error: function(jqXHR, textStatus, errorThrown) {
                     alert("Error: " + jqXHR.responseText);
                 }
             });
+
+            function assignButtonEvents() {
+                $(".beEmployee").click(function(event) {
+                    event.preventDefault();
+                    var companyId = $(this).prop("value");
+                    $.ajax({
+                        type: "POST",
+                        url: "/api/company/" + companyId + "/employees",
+                        dataType: "json",
+                        headers: {
+                            "X-XSRF-TOKEN": token
+                        },
+                        success: function(data) {
+                            alert("Request has been sent!");
+                        },
+                        error: function(jqXHR, textStatus, errorThrown) {
+                            alert("Error: " + jqXHR.responseText);
+                        }
+                    });
+                });
+            }
 
         });
     </script>

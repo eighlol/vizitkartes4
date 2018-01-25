@@ -9,6 +9,7 @@ namespace BusinessCards.Services
         Company GetUserCompany(ApplicationUser user);
         Company GetCompany(int id);
         IEnumerable<BusinessCard> GetCompanyEmployees(Company company);
+        IEnumerable<ApplicationUser> GetCompanyUsers(Company company);
         void MakeCompanyEmployee(ApplicationUser user, int companyId);
         bool Save();
     }
