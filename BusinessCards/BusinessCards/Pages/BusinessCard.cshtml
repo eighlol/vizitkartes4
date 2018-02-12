@@ -195,15 +195,13 @@
                 contentType: "application/json; charset=utf-8",
                 dataType: "json",
                 headers: {
-                    "X-XSRF-TOKEN": token
+                        "X-XSRF-TOKEN": token
                 },
                 success: function(res) {
                     businessCardObj = businessCard;
                 },
                 error: function(jqXHR, textStatus, errorThrown) {
-                    if (jqXHR.status === 400) {
-                        createBusinessCardForm(true);
-                    } else if (jqXHR.status === 401) {
+                    if (jqXHR.status === 401) {
                         alert("Please log in!");
                         window.location.href = '/';
                     } else {
